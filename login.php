@@ -26,6 +26,7 @@
                 $_SESSION["firstname"] = $row["firstname"];
                 $_SESSION["lastname"] = $row["lastname"];
                 $_SESSION["privilege_level"] = $row["privilege_level"];
+                $_SESSION['userid'] = $row['id'];
                 header("Location: dashboard.php");
             }
             else
