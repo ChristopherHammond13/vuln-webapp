@@ -2,6 +2,12 @@
     require("config.php");
     session_start();
 
+    if (!isset($_SESSION['username']))
+    {
+        header("Location: index.php");
+        exit();
+    }
+
     $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
 ?>
 <!doctype html>
@@ -16,7 +22,7 @@
 
     if($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["id"]) && !isset($_GET["not_found"]))
     {
-        $tracking_id = $_GET["id"];
+        $tracking_id = $db->real_escape_string(htmlspecialchars($_GET["id"]));
         
         $shipment_result = $db->query("SELECT * FROM shipment WHERE id = '$tracking_id'");
         $shipment = $shipment_result->fetch_array(MYSQLI_ASSOC);
@@ -36,11 +42,12 @@
     }
     elseif($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET["id"]))
     {
-        $tracking_id = $_GET["id"];
+        $tracking_id = htmlspecialchars($_GET["id"]);
     }
     elseif($_SERVER["REQUEST_METHOD"] == "GET" && !isset($_GET["id"]) && !isset($_GET["invalid"])) 
     {
         header("Location: tracking.php?invalid");
+        exit();
     }
 ?>
 
