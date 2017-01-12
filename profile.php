@@ -23,9 +23,9 @@
             {
                 die("Failed to connect to MySQL:");
             }
-            $firstName = $db->real_escape_string($_POST["firstName"]);
-            $lastName = $db->real_escape_string($_POST["lastName"]);
-            $email = $db->real_escape_string($_POST["email"]);
+            $firstName = $db->real_escape_string(htmlspecialchars($_POST["firstName"]));
+            $lastName = $db->real_escape_string(htmlspecialchars($_POST["lastName"]));
+            $email = $db->real_escape_string(htmlspecialchars($_POST["email"]));
             $userid = $_SESSION['userid'];
             $password = isset($_POST['password']) ? $_POST['password'] : 0; //initialise the password variable
             
