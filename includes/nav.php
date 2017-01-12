@@ -1,3 +1,9 @@
+<?php
+    if (session_status() == PHP_SESSION_NONE)
+    {
+        session_start();
+    }
+?>
 <div class="header">
     <nav class="nav">
         <div class="nav-left">
@@ -5,6 +11,12 @@
             <a href="index.php">
                 <img src="assets/images/logo.png" alt="Planet Express Logo">
             </a>
+            <?php
+                if (isset($_SESSION['email']))
+                {
+                    echo "Hello, " . $_SESSION['firstname'] . " " . $_SESSION['lastname'];
+                }
+            ?>
             </div>
         </div>
 
@@ -28,11 +40,6 @@
             </a>
             <span class="nav-item">
                 <?php
-                    // Only show the log out button if the user's already logged in
-                    if (session_status() == PHP_SESSION_NONE)
-                    {
-                        session_start();
-                    }
                     if (isset($_SESSION['email']))
                     {
 
