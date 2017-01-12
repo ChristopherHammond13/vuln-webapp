@@ -23,6 +23,9 @@
             {
                 $row = $result->fetch_array(MYSQLI_ASSOC);
                 $_SESSION["email"] = $row["email"];
+                $_SESSION["firstname"] = $row["firstname"];
+                $_SESSION["lastname"] = $row["lastname"];
+                $_SESSION["privilege_level"] = $row["privilege_level"];
                 header("Location: dashboard.php");
             }
             else
