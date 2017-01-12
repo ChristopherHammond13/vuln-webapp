@@ -2,6 +2,11 @@
     require("config.php");
     require("includes/PasswordHash.php");
     session_start();
+    if (!isset($_SESSION['email']))
+    {
+        header("Location: index.php");
+        exit();
+    }
     $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
 ?>
 <html>
