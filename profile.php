@@ -52,7 +52,6 @@
                 $_SERVER["firstname"] = $firstName;
                 $_SESSION["lastname"] = $lastName;
                 $_SESSION["privilege_level"] = $privilege_level;
-                $_SESSION["password"] = $password;
                 echo "data has been updated";
                 header("Location : index.php?data_updated");
             }
