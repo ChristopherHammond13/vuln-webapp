@@ -1,5 +1,6 @@
 <?php
     require("config.php");
+    require("includes/PasswordHash.php");
     session_start();
     $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
 ?>
@@ -10,55 +11,36 @@
     </head>
 
     <?php
-        $thingy = $_SESSION["email"];
-        $result = mysqli_query($db, "SELECT * FROM user WHERE email='$thingy'");
-        $deets = mysqli_fetch_array($result);
-        $id = $deets["id"];
-        $dfname = $deets["firstname"]; //data from the database
-        $dpword = $deets["password"];
-        $dlname = $deets["lastname"];  //data from the database
-        $dplevel = $deets["privilege_level"]; //data from the database
-
-        $_SESSION["id"] = $id;
-        $_SESSION["firstname"] = $dfname;
-        $_SESSION["lastname"] = $dlname;
-        $_SESSION["privilege_level"] = $dplevel;
-
         include("includes/nav.php");
         if($_SERVER["REQUEST_METHOD"] == "POST")
         {
-            $firstName = $_POST["firstName"];
-            $lastName = $_POST["lastName"];
-            $email = $_POST["email"];
-            $password = ""; //initialise the password variable
-            if($password == "")
-            {
-                $password = $dpword;
-            }
-
-            else
-            {
-                $password = $_POST["password"];
-            }
-            $privilege_level = $_POST["privilege_level"];
             if($db->connect_errno)
             {
-                echo "Failed to connect to MySQL: (" . $mysqli->db. ") " . $mysqli->db;
+                die("Failed to connect to MySQL:");
             }
-            else
+            $firstName = $db->real_escape_string($_POST["firstName"]);
+            $lastName = $db->real_escape_string($_POST["lastName"]);
+            $email = $db->real_escape_string($_POST["email"]);
+            $userid = $_SESSION['userid'];
+            $password = isset($_POST['password']) ? $_POST['password'] : 0; //initialise the password variable
+            
+            $db->query("UPDATE user SET firstname = '$firstName', lastname = '$lastName', email='$email' WHERE id='$userid'");
+            if ($password != "")
             {
-                $db->query("UPDATE user SET firstname = '$firstName', lastname = '$lastName', email='$email', password='$password', privilege_level='$privilege_level' WHERE id='$id'");
-                $_SESSION["email"] = $email;
-                $_SERVER["firstname"] = $firstName;
-                $_SESSION["lastname"] = $lastName;
-                $_SESSION["privilege_level"] = $privilege_level;
-                echo "data has been updated";
-                header("Location : index.php?data_updated");
+                // Securely hash the password with salted bcrypt
+                $ph = new PasswordHash(8, true);
+                $hash = $ph->HashPassword($password);
+                $hash = $db->real_escape_string($hash);
+                $db->query("UPDATE user SET password = '$hash'");
             }
+            $_SESSION["email"] = $email;
+            $_SESSION["firstname"] = $firstName;
+            $_SESSION["lastname"] = $lastName;
+            header("Location: index.php?data_updated");
 
         }
 
-        if(isset($_SESSION["email"])) //check for username, may have to change it
+        if(isset($_SESSION["email"]))
         {
         ?>
 
@@ -95,10 +77,6 @@
                             </p>
                         </div>
                     </div>
-                    <p class="control">
-                        <input class="input" type="hidden"  name="privilege_level"  placeholder="privilege level"> <!-- #privilegeescelation -->
-                    </p>
-
                     <p class = "control">
                         <button class="button is-success" type="submit">
                             Submit
@@ -110,7 +88,7 @@
 
         else
         {
-            header("Location : index.php");
+            header("Location: index.php");
         }
 
         ?>
