@@ -4,6 +4,8 @@
     if (!isset($_SESSION["email"]))
     {
         header("Location: login.php?not_logged_in");
+		// Ensure the script stops loading if the user is not logged in to protect the rest of the page.
+		exit();
     }
 
     $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
