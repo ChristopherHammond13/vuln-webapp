@@ -7,66 +7,46 @@
 
     require('config.php');
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
-        // echo(print_r($_POST));
-        $description = $_POST['description'];
-        $packages = $_POST['packages'];
-        $shippingtype = $_POST['shippingtype'];
-        $cost = $_POST['cost'];
-        $destination = $_POST['destination'];
-        $email = $_SESSION['email'];
-
         $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+        // echo(print_r($_POST));
+        $description = $db->real_escape_string(htmlspecialchars($_POST['description']));
+        $packages = $db->real_escape_string(htmlspecialchars($_POST['packages']));
+        $shippingtype = $db->real_escape_string(htmlspecialchars($_POST['shippingtype']));
+        $cost = (float)($db->real_escape_string(htmlspecialchars($_POST['cost'])));
+        $destination = $db->real_escape_string(htmlspecialchars($_POST['destination']));
+        $userid = $_SESSION['userid'];
+
         if ($db->connect_errno)
         {
-            echo "Failed to connect to MySQL: (" . $mysqli->db. ") " . $mysqli->db;
+            die("Failed to connect to MySQL");
         }
         else
         {
-            // $query = $db->prepare("INSERT INTO `user` (email,password,privilege_level) VALUES (?,?,1)");
-            // $query->bind_param("ss", $email, $passwd);
-
-            // $query->execute();
-
-            // $query->close();
-            $result = $db->query("SELECT id FROM user WHERE email = '$email';");
-            if ($result) {
-                if ($result->num_rows > 0)
-                {
-                    $row = $result->fetch_array(MYSQLI_ASSOC);
-                    $id = $row["id"];
-                    // Why prepare statements when you can cripple horrendously?
-                    $db->query("INSERT INTO `shipment` (name, cost, destination, customer_id, date_dispatch) VALUES('$description', '$cost', '$destination', '$id', NOW())");
-                    $shipment_id = $db->insert_id;
-                    foreach ($packages as $pkg) {
-                        if ($pkg['cost'] === 0) {
-                            continue;
-                        }
-                        $query = <<<SQL
-                            INSERT INTO `package`
-                            (description, cost, width, height, depth, weight, shipment_id)
-                            VALUES (
-                                "{$pkg['name']}",
-                                "{$pkg['cost']}",
-                                "{$pkg['height']}",
-                                "{$pkg['width']}",
-                                "{$pkg['depth']}",
-                                "{$pkg['weight']}",
-                                '$shipment_id'
-                            );
+            $result = $db->query("SELECT id FROM user WHERE id = '$userid';");
+            $row = $result->fetch_array(MYSQLI_ASSOC);
+            $id = $row["id"];
+            $db->query("INSERT INTO `shipment` (name, cost, destination, customer_id, date_dispatch) VALUES('$description', $cost, '$destination', '$id', NOW())");
+            $shipment_id = $db->insert_id;
+            foreach ($packages as $pkg) {
+                if ($pkg['cost'] === 0) {
+                    continue;
+                }
+                $query = <<<SQL
+                    INSERT INTO `package`
+                    (description, cost, width, height, depth, weight, shipment_id)
+                    VALUES (
+                        "{$pkg['name']}",
+                        "{$pkg['cost']}",
+                        "{$pkg['height']}",
+                        "{$pkg['width']}",
+                        "{$pkg['depth']}",
+                        "{$pkg['weight']}",
+                        '$shipment_id'
+                    );
 SQL;
-                        $db->query($query);
-                    }
-                    header("Location: index.php?created");
-                }
-                else
-                {
-                    header("Location: login.php?invalid");
-                }
+                $db->query($query);
             }
-            else
-            {
-                header("Location: login.php?invalid");
-            }
+            header("Location: index.php?created");
 
         }
     }
