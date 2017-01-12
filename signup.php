@@ -4,38 +4,32 @@
     if (isset($_SESSION['email']))
     {
         header("Location: index.php");
-        // TODO: Add  exit(); here so that the page doesn't continue to load if the session is initialised
+        exit();
     }
 
     require("config.php");
+    require("includes/PasswordHash.php");
     if($_SERVER["REQUEST_METHOD"] == "POST")
     {
-        $firstName = $_POST["firstName"];
-        $lastName = $_POST["lastName"];
-        $email = $_POST["email"];
-        $passwd = $_POST["password"];
-        $privlevel = $_POST["privilege_level"];
-
-        //define $query depending on tables and databases matt adds
         $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+        $firstName = $db->real_escape_string(htmlspecialchars($_POST["firstName"]));
+        $lastName = $db->real_escape_string(htmlspecialchars($_POST["lastName"]));
+        $email = $db->real_escape_string(htmlspecialchars($_POST["email"]));
+        $passwd = $_POST["password"];
+        $privlevel = 1; // Only an admin can create an administrator or disable/enable an account
+        
         if ($db->connect_errno)
         {
-            echo "Failed to connect to MySQL: (" . $mysqli->db. ") " . $mysqli->db;
+            die("Failed to connect to MySQL");
         }
         else
         {
-            // $query = $db->prepare("INSERT INTO `user` (email,password,privilege_level) VALUES (?,?,1)");
-            // $query->bind_param("ss", $email, $passwd);
-
-            // $query->execute();
-
-            // $query->close();
-
-            // Why prepare statements when you can cripple horrendously?
-
-            $db->query("INSERT INTO `user` (email, password, firstname, lastname, privilege_level) VALUES('$email', '$passwd', '$firstName', '$lastName', '$privlevel')");
+            $ph = new PasswordHash(8, true);
+            $pwhash = $ph->HashPassword($passwd);
+            $pwhash = $db->real_escape_string($pwhash);
+            $db->query("INSERT INTO `user` (email, password, firstname, lastname, privilege_level) VALUES('$email', '$pwhash', '$firstName', '$lastName', 1)");
             header("Location: login.php?created");
-
+            exit();
         }
     }
 ?>
