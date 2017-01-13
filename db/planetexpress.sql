@@ -23,7 +23,7 @@ CREATE TABLE `user` (
     email varchar(256) NOT NULL,
     firstname varchar(256) NOT NULL,
     lastname varchar(256) NOT NULL,
-    password varchar(8) NOT NULL,
+    password varchar(40) NOT NULL,
     privilege_level int UNSIGNED NOT NULL DEFAULT 1
 );
 
@@ -50,6 +50,7 @@ CREATE TABLE `package` (
     height int UNSIGNED NOT NULL,
     depth int UNSIGNED NOT NULL,
     shipment_id int UNSIGNED NOT NULL,
+    weight int UNSIGNED NOT NULL,
 
     FOREIGN KEY (shipment_id) REFERENCES `shipment`(id)
 );
